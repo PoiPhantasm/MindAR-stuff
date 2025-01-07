@@ -4,6 +4,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <!--<script src="/src/image-target/aframe.js" type="module"></script>-->
+    <style>
+        #header {
+            position: absolute;
+            bottom:20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border-radius: 5px;
+            z-index: 9999;
+        }
+    </style>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const sceneEl = document.querySelector('a-scene');
@@ -58,6 +75,8 @@
     </script>
 </head>
 <body>
+    <!-- Header for displaying the file name -->
+    <div id="header"></div>
     <div style="position: absolute; z-index: 1000">
         <button id="example-start-button">Start</button>
         <button id="example-pause-button">Pause</button>
@@ -72,5 +91,14 @@
             <a-plane id="example-plane" class="clickable" color="blue" opaciy="0.5" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
         </a-entity>
     </a-scene>
+    <script>
+        // Dynamically display the name of the HTML file
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.getElementById('header');
+            const fileName = location.pathname.split('/').pop(); // Extracts the file name
+            header.textContent = `${fileName}`;
+        });
+    </script>
 </body>
+
 </html>
