@@ -13,27 +13,31 @@
             background-color: #f5f5f5;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             min-height: 100vh;
         }
 
         header {
             text-align: center;
-            margin-bottom: 20px;
+            background-color: #007BFF; /* Blue background */
+            color: white;
+            padding: 20px;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
         }
 
         main {
             text-align: center;
+            padding: 20px;
+            flex-grow: 1;
         }
 
         .links {
-            margin: 20px 0; /* Adds space above and below the links */
+            margin: 20px 0;
         }
 
             .links a {
-                display: block; /* Stacks the links vertically */
-                margin: 10px 0; /* Space between the links */
+                display: block;
+                margin: 10px 0;
                 text-decoration: none;
                 font-size: 18px;
                 color: #007BFF;
@@ -57,26 +61,48 @@
                 background-color: #0056b3;
             }
 
+        iframe {
+            margin: 20px 0;
+            max-width: 100%;
+            height: auto;
+        }
+
         footer {
-            margin-top: 20px;
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: #fff;
             font-size: 14px;
-            color: #666;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to Nebula WebAR!</h1>
+        <img src="assets/DDIcon.png" alt="DD" width="100" />
     </header>
     <main>
         <section>
+  
             <p>This is the main content area.</p>
+            <p>Below are the webpages that are currently accessible.</p>
             <div class="links">
                 <a href="eventstest.html">Events Test</a>
                 <a href="multitargets.html">Multi-target Test</a>
             </div>
             <button onclick="alert('Test')">Click Me</button>
         </section>
+        <section>
+            <h3>Learn English with Thanos from Squid Game!</h3>
+            <iframe src="https://www.youtube.com/embed/lOm22UiqH-A"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  style="width: 560px; height: 315px; margin: 0 auto 100px; display: block;">
+            </iframe>
+        </section>
+
     </main>
     <footer>
         <p>&copy; 2025 Digital Dream</p>
