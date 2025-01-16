@@ -1,23 +1,79 @@
-<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>A-Frame Particle System Component Example</title>
-    <meta name="description" content="Hello, World!">
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/shaders/LuminosityShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/shaders/CopyShader.js"></script>
 </head>
 <body>
-    <a-scene>
-        <!-- Particle system uses 'default' preset, setting custom colors. -->
-        <a-entity position="0 2.25 -15" particle-system="color: #EF0000,#44CC00"></a-entity>
+    <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-assets>
+            <a-asset-item id="glassesModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses/scene.gltf"></a-asset-item>
+            <a-asset-item id="headModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
+        </a-assets>
 
-        <a-sphere position="0 1.25 -1" radius="1.25" color="#EF2D5E"></a-sphere>
-        <a-box position="-1 0.5 1" rotation="0 45 0" width="1" height="1" depth="1" color="#4CC3D9"></a-box>
-        <a-cylinder position="1 0.75 1" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-        <a-plane rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-
-        <a-sky color="#000000"></a-sky>
+        <a-camera active="false" position="0 0 0"></a-camera>
+        <a-entity mindar-face-target="anchorIndex: 168">
+            <a-gltf-model mindar-face-occluder position="0 -0.3 0.15" rotation="0 0 0" scale="0.065 0.065 0.065" src="#headModel"></a-gltf-model>
+        </a-entity>
+        <a-entity mindar-face-target="anchorIndex: 168">
+            <a-gltf-model rotation="0 0 0" position="0 0 0" scale="0.01 0.01 0.01" src="#glassesModel"></a-gltf-model>
+        </a-entity>
     </a-scene>
+
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            const sceneEl = document.querySelector('a-scene');
+            const renderer = sceneEl.renderer;
+            const scene = sceneEl.object3D;
+
+            sceneEl.renderer.autoClear = false;
+            let activeCamera = sceneEl.querySelector('a-camera');
+            if (!activeCamera) {
+                console.error('No active camera found!');
+                return;
+            }
+
+            // Create post-processing composer
+            const composer = new THREE.EffectComposer(renderer);
+            const renderPass = new THREE.RenderPass(scene, activeCamera);
+
+            // Create LuminosityShader pass
+            const bwPass = new THREE.ShaderPass(THREE.LuminosityShader);
+
+            // Manually set the uniforms for LuminosityShader (in case they are undefined)
+            if (!bwPass.uniforms) {
+                bwPass.uniforms = {};
+            }
+
+            if (!bwPass.uniforms['luminosityThreshold']) {
+                bwPass.uniforms['luminosityThreshold'] = { value: 0.5 };  // Default value for luminosity threshold
+            }
+
+            if (!bwPass.uniforms['luminositySmoothing']) {
+                bwPass.uniforms['luminositySmoothing'] = { value: 0.5 };  // Default value for smoothing
+            }
+
+            // Optionally, adjust other parameters as needed
+            bwPass.uniforms['luminosityThreshold'].value = 0.5;  // Adjust luminosity threshold
+            bwPass.uniforms['luminositySmoothing'].value = 0.5;  // Adjust smoothing effect
+
+            const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+
+            // Add passes to composer
+            composer.addPass(renderPass);
+            composer.addPass(bwPass);
+            composer.addPass(copyPass);
+
+            renderer.setAnimationLoop(() => {
+                composer.render();
+            });
+        });
+    </script>
 </body>
 </html>
