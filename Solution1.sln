@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F4FD435B-F9B6-48E6-B9F0-5F8B7A2E5932}"
+	ProjectSection(SolutionItems) = preProject
+		faceTest.html = faceTest.html
+		faceTest2.html = faceTest2.html
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C0BF872-4C4C-4FAD-9F54-F586897F52E0}
+	EndGlobalSection
+EndGlobal

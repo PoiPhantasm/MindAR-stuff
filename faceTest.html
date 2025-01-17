@@ -1,0 +1,142 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        #fullscreen, .a-enter-vr {
+            position: fixed !important; /* Override the default absolute position */
+            bottom: 20px; /* Adjust to your desired position */
+            right: 20px;
+            z-index: 10000; /* Ensure it's above other elements */
+        
+      
+  
+        }
+        #controls-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100; /* Ensures it appears above the scene */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+/**/        a-scene {
+            height: 100vh;
+            width: 100vw;
+            display: block;  Fix inline behavior 
+            margin: 0;
+            padding: 0;
+        }
+
+        #radius-slider {
+            width: 100px;
+            margin: 0;
+            padding: 0;
+        }
+
+        #header {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border-radius: 5px;
+            z-index: 9999;
+        }
+        .color-button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+            .color-button.red {
+                background-color: red;
+            }
+
+            .color-button.green {
+                background-color: green;
+            }
+
+            .color-button.blue {
+                background-color: blue;
+            }
+    </style>
+
+</head>
+<body>
+    <!-- Header for displaying the file name -->
+    <div id="header"></div>
+    <div id="controls-container">
+        <label for="radius-slider" style="color: white;">Customize:</label>
+        <input type="range" id="radius-slider" min="0.05" max="0.2" step="0.01" value="0.05">
+        <button class="color-button red" data-color="red"></button>
+        <button class="color-button green" data-color="green"></button>
+        <button class="color-button blue" data-color="blue"></button>
+    </div>
+
+    <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enable: false" device-orientation-permission-ui="enabled: false">
+        <a-camera active="false" position="0 0 0"></a-camera>
+        <a-entity mindar-face-target="anchorIndex: 1">
+            <a-sphere id="nose-sphere" color="green" radius="0.1"></a-sphere>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const radiusSlider = document.getElementById('radius-slider');
+            const noseSphere = document.getElementById('nose-sphere');
+            const controlsContainer = document.getElementById('controls-container');
+            const colorButtons = document.querySelectorAll('.color-button');
+
+            // Prevent A-Frame from capturing touch events when interacting with the controls
+            controlsContainer.addEventListener('touchstart', (event) => event.stopPropagation());
+            controlsContainer.addEventListener('touchmove', (event) => event.stopPropagation());
+            controlsContainer.addEventListener('mousedown', (event) => event.stopPropagation());
+            controlsContainer.addEventListener('mousemove', (event) => event.stopPropagation());
+
+            // Update the radius of the green sphere when the slider value changes
+            radiusSlider.addEventListener('input', () => {
+                const newRadius = parseFloat(radiusSlider.value);
+                noseSphere.setAttribute('radius', newRadius);
+            });
+
+            // Change the color of the sphere when a color button is clicked
+            colorButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const newColor = event.target.getAttribute('data-color');
+                    noseSphere.setAttribute('color', newColor);
+                });
+            });
+        });
+    </script>
+    <script>
+        // Dynamically display the name of the HTML file
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.getElementById('header');
+            const fileName = location.pathname.split('/').pop(); // Extracts the file name
+            header.textContent = `${fileName}`;
+        });
+    </script>
+</body>
+</html>

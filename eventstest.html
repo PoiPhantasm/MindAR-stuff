@@ -8,7 +8,7 @@
     <style>
         #header {
             position: absolute;
-            bottom:20px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0, 0, 0, 0.7);
@@ -20,7 +20,20 @@
             z-index: 9999;
         }
     </style>
-
+    <style>
+        /* Sepia overlay */
+        #filterOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows interaction with AR elements */
+            background-color: rgba(112, 66, 20, 0.3); /* Sepia tone */
+            mix-blend-mode: multiply; /* Blend with the camera feed */
+            z-index: 9999; /* On top of the AR content */
+        }
+    </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const sceneEl = document.querySelector('a-scene');
@@ -77,6 +90,8 @@
 <body>
     <!-- Header for displaying the file name -->
     <div id="header"></div>
+    <!-- CSS overlay for sepia effect -->
+    <div id="filterOverlay"></div>
     <div style="position: absolute; z-index: 1000">
         <button id="example-start-button">Start</button>
         <button id="example-pause-button">Pause</button>
