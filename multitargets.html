@@ -20,15 +20,13 @@
             z-index: 9999;
         }
 
-        /* Overlay Image Styling */
+        /* Overlay Styling */
         #overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('./assets/overlay.png') no-repeat center;
-            background-size: cover;
             pointer-events: none; /* Makes it non-interactive */
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
@@ -40,7 +38,7 @@
     <!-- Header for displaying the file name -->
     <div id="header"></div>
 
-    <!-- Overlay Image -->
+    <!-- Overlay -->
     <div id="overlay"></div>
 
     <a-scene mindar-image="imageTargetSrc:./assets/targets.mind; filterMinCF:0.1; filterBeta:10;"
@@ -81,14 +79,27 @@
             const fileName = location.pathname.split('/').pop();
             header.textContent = `File Name: ${fileName}`;
 
+            // Define different overlay images for each target index
+            const overlayImages = {
+                0: './assets/overlay.png',
+                1: './assets/overlay2.png',
+                2: './assets/overlay.png',
+                3: './assets/overlay2.png'
+            };
+
             // Listen for target found and lost events
-            const scene = document.querySelector('a-scene');
             const targets = document.querySelectorAll('[mindar-image-target]');
 
             targets.forEach((target) => {
-                target.addEventListener('targetFound', () => {
-                    console.log('Marker found');
-                    overlay.style.opacity = '1'; // Show overlay
+                target.addEventListener('targetFound', (event) => {
+                    const targetIndex = target.getAttribute('mindar-image-target').targetIndex;
+                    console.log(`Marker found: Target Index ${targetIndex}`);
+
+                    // Update the overlay background
+                    if (overlayImages[targetIndex]) {
+                        overlay.style.backgroundImage = `url(${overlayImages[targetIndex]})`;
+                        overlay.style.opacity = '1'; // Show overlay
+                    }
                 });
 
                 target.addEventListener('targetLost', () => {
