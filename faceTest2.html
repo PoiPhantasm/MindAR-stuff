@@ -1,16 +1,61 @@
-
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border-radius: 5px;
+            z-index: 9999;
+        }
+    </style>
 </head>
 <body>
-    <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <!-- Status message -->
+    <div id="status">Waiting for face target...</div>
+
+    <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights">
         <a-camera active="false" position="0 0 0"></a-camera>
-        <a-entity mindar-face-target="anchorIndex: 1">
-            <a-sphere color="green" radius="0.1"></a-sphere>
+        <a-entity mindar-face-target="anchorIndex: 0">
+            <a-box color="red" position="0 0 -0.5" width="0.2" height="0.2" depth="0.2"></a-box>
         </a-entity>
     </a-scene>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusElement = document.getElementById('status');
+            const scene = document.querySelector('a-scene');
+
+            // Listen for MindAR events
+            scene.addEventListener('mindar-face-ready', () => {
+                statusElement.textContent = 'MindAR face tracking is ready.';
+            });
+
+            scene.addEventListener('targetFound', () => {
+                statusElement.textContent = 'Face target found!';
+            });
+
+            scene.addEventListener('targetLost', () => {
+                statusElement.textContent = 'Face target lost!';
+            });
+        });
+    </script>
 </body>
 </html>
