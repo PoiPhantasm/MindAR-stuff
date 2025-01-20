@@ -33,8 +33,15 @@
 
     <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights">
         <a-camera active="false" position="0 0 0"></a-camera>
-        <a-entity mindar-face-target="anchorIndex: 0">
-            <a-box color="red" position="0 0 -0.5" width="0.2" height="0.2" depth="0.2"></a-box>
+
+        <!-- Face Target Entity -->
+        <a-entity mindar-face-target="anchorIndex: 1">
+            <!-- A sphere attached to the nose -->
+            <a-sphere id="nose-sphere"
+                      color="green"
+                      position="0 0 0.1"
+                      radius="0.05">
+            </a-sphere>
         </a-entity>
     </a-scene>
 
@@ -42,18 +49,29 @@
         document.addEventListener('DOMContentLoaded', () => {
             const statusElement = document.getElementById('status');
             const scene = document.querySelector('a-scene');
+            const sphere = document.getElementById('nose-sphere');
+
+            // Log for debugging
+            console.log("Scene initialized");
 
             // Listen for MindAR events
             scene.addEventListener('mindar-face-ready', () => {
                 statusElement.textContent = 'MindAR face tracking is ready.';
+                console.log("MindAR is ready");
             });
 
             scene.addEventListener('targetFound', () => {
                 statusElement.textContent = 'Face target found!';
+                console.log("Face target found");
+                // Confirm sphere visibility
+                sphere.setAttribute('visible', 'true');
             });
 
             scene.addEventListener('targetLost', () => {
                 statusElement.textContent = 'Face target lost!';
+                console.log("Face target lost");
+                // Hide sphere when target is lost
+                sphere.setAttribute('visible', 'false');
             });
         });
     </script>
