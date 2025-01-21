@@ -53,6 +53,35 @@
                 }
                 spawnButton.textContent = isSpawned ? 'Despawn Hat' : 'Spawn Hat';
             });
+
+            // Add camera switch button functionality
+            const switchCameraButton = document.createElement('button');
+            switchCameraButton.id = 'switchCameraButton';
+            switchCameraButton.className = 'spawn-button';
+            switchCameraButton.style.bottom = '60px'; // Adjust position above the spawn button
+            switchCameraButton.textContent = 'Switch Camera';
+            document.body.appendChild(switchCameraButton);
+
+            // Initialize MindARThree
+            const mindarThree = new window.MINDAR.FACE.MindARThree({
+                container: document.body,
+            });
+            const { renderer, scene: mindarScene, camera } = mindarThree;
+
+            // Start MindARThree
+            const startMindAR = async () => {
+                await mindarThree.start();
+                renderer.setAnimationLoop(() => {
+                    renderer.render(mindarScene, camera);
+                });
+            };
+
+            startMindAR();
+
+            // Add event listener for camera switch
+            switchCameraButton.addEventListener('click', () => {
+                mindarThree.switchCamera();
+            });
         })
     </script>
     <style>
