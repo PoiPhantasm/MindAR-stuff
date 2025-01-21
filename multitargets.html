@@ -32,7 +32,54 @@
             transition: opacity 0.5s ease-in-out;
             z-index: 99; /* Below header but above the scene */
         }
+
+        /* Add switch camera button styles */
+        #switch-camera {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
+
+    <script>
+        class CameraSwitcher {
+            constructor() {
+                this.currentCamera = 'environment';
+                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            }
+
+            async switchCamera() {
+                try {
+                    this.currentCamera = this.currentCamera === 'environment' ? 'user' : 'environment';
+                    const sceneEl = document.querySelector('a-scene');
+                    const arSystem = sceneEl.systems["mindar-image-system"];
+                    
+                    // Stop current AR session
+                    await arSystem.stop();
+                    
+                    // Update camera facing mode
+                    sceneEl.setAttribute('mindar-image', {
+                        imageTargetSrc: './assets/targets.mind',
+                        filterMinCF: 0.1,
+                        filterBeta: 10,
+                        facingMode: this.currentCamera
+                    });
+
+                    // Restart AR session
+                    await arSystem.start();
+                } catch (error) {
+                    console.error('Error switching camera:', error);
+                    alert('Failed to switch camera: ' + error.message);
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <!-- Header for displaying the file name -->
@@ -41,7 +88,10 @@
     <!-- Overlay -->
     <div id="overlay"></div>
 
-    <a-scene mindar-image="imageTargetSrc:./assets/targets.mind; filterMinCF:0.1; filterBeta:10;"
+    <!-- Add switch camera button -->
+    <button id="switch-camera">Switch Camera</button>
+
+    <a-scene mindar-image="imageTargetSrc:./assets/targets.mind; filterMinCF:0.1; filterBeta:10; facingMode: environment"
              color-space="sRGB"
              renderer="colorManagement: true, physicallyCorrectLights"
              vr-mode-ui="enabled: false"
@@ -106,6 +156,14 @@
                     console.log('Marker lost');
                     overlay.style.opacity = '0'; // Hide overlay
                 });
+            });
+
+            // Initialize camera switcher
+            const cameraSwitcher = new CameraSwitcher();
+            
+            // Add switch camera button event listener
+            document.getElementById('switch-camera').addEventListener('click', async () => {
+                await cameraSwitcher.switchCamera();
             });
         });
     </script>
