@@ -26,6 +26,26 @@
                     setVisible(button, entities, visibles[index]);
                 });
             });
+
+            // Add spawn button functionality
+            const spawnButton = document.querySelector("#spawnButton");
+            const hat1Entity = document.createElement('a-entity');
+            hat1Entity.setAttribute('position', '0 0 -1');
+            hat1Entity.setAttribute('scale', '0.15 0.15 0.15');
+            hat1Entity.setAttribute('rotation', '0 0 0');
+            hat1Entity.setAttribute('gltf-model', '#hatModel');
+            hat1Entity.setAttribute('visible', 'false');
+            
+            let isSpawned = false;
+            
+            // Add the entity to the scene
+            document.querySelector('a-scene').appendChild(hat1Entity);
+            
+            spawnButton.addEventListener('click', () => {
+                isSpawned = !isSpawned;
+                hat1Entity.setAttribute('visible', isSpawned);
+                spawnButton.textContent = isSpawned ? 'Despawn Hat' : 'Spawn Hat';
+            });
         })
     </script>
     <style>
@@ -58,6 +78,23 @@
                 .options-panel img.selected {
                     border-color: green;
                 }
+
+        .spawn-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .spawn-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +106,7 @@
             <img id="glasses2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses2/thumbnail.png" />
             <img id="earring" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/earring/thumbnail.png" />
         </div>
+        <button id="spawnButton" class="spawn-button">Spawn Hat</button>
         <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
             <a-assets>
                 <a-asset-item id="headModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
