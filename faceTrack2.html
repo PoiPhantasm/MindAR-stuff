@@ -60,10 +60,24 @@
                 .options-panel img.selected {
                     border-color: green;
                 }
+
+        .filename-display {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
     <div class="example-container">
+        <div class="filename-display">faceTrack2.html</div>
         <div class="options-panel">
             <img id="hat1" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat/thumbnail.png" />
             <img id="hat2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat2/thumbnail.png" />
