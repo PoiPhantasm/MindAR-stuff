@@ -28,14 +28,6 @@
                     setVisible(button, entities, visibles[index]);
                 });
             });
-
-            // iOS Safari-specific initialization
-            const sceneEl = document.querySelector('a-scene');
-            const arSystem = sceneEl.systems["mindar-face-system"];
-            
-            sceneEl.addEventListener('renderstart', () => {
-                arSystem.start(); // start AR 
-            });
         })
     </script>
     <style>
