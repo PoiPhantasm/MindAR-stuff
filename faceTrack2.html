@@ -11,6 +11,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Enhanced device detection
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Get device type string
+            const deviceType = isIOS ? "iOS" : (isAndroid ? "Android" : (isMobile ? "Mobile" : "PC"));
+            
+            // Update filename display with device info
+            const filenameDisplay = document.querySelector('.filename-display');
+            filenameDisplay.textContent = `faceTrack2.html (${deviceType})`;
+            
+            // Set positions based on device
+            const glassesPosition = isMobile ? "0 -0.15 0" : "0 -0.3 0";
+            const glasses2Position = isMobile ? "0 -0.15 0" : "0 -0.3 0";
+            
+            // Update positions after scene loads
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', () => {
+                document.querySelector('.glasses1-entity').setAttribute('position', glassesPosition);
+                document.querySelector('.glasses2-entity').setAttribute('position', glasses2Position);
+            });
+
             const list = ["glasses1", "glasses2", "hat1", "hat2", "earring"];
             const visibles = [true, false, false, true, true];
             const setVisible = (button, entities, visible) => {
