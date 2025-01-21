@@ -1,181 +1,38 @@
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const list = ["glasses1", "glasses2", "hat1", "hat2", "earring"];
-            const visibles = [true, false, false, true, true];
-            const setVisible = (button, entities, visible) => {
-                if (visible) {
-                    button.classList.add("selected");
-                } else {
-                    button.classList.remove("selected");
-                }
-                entities.forEach((entity) => {
-                    entity.setAttribute("visible", visible);
-                });
-            }
-            list.forEach((item, index) => {
-                const button = document.querySelector("#" + item);
-                const entities = document.querySelectorAll("." + item + "-entity");
-                setVisible(button, entities, visibles[index]);
-                button.addEventListener('click', () => {
-                    visibles[index] = !visibles[index];
-                    setVisible(button, entities, visibles[index]);
-                });
-            });
-
-            // Add spawn button functionality
-            const spawnButton = document.querySelector("#spawnButton");
-            const hat1Entity = document.createElement('a-entity');
-            hat1Entity.setAttribute('position', '0 0 -1');
-            hat1Entity.setAttribute('scale', '0.15 0.15 0.15');
-            hat1Entity.setAttribute('rotation', '0 0 0');
-            hat1Entity.setAttribute('gltf-model', '#hatModel');
-            hat1Entity.setAttribute('visible', 'false');
-            
-            let isSpawned = false;
-            
-            // Wait for scene to load before adding entity
-            const scene = document.querySelector('a-scene');
-            scene.addEventListener('loaded', function () {
-                scene.appendChild(hat1Entity);
-            });
-            
-            spawnButton.addEventListener('click', () => {
-                isSpawned = !isSpawned;
-                hat1Entity.setAttribute('visible', isSpawned);
-                if (isSpawned) {
-                    // Force position update on spawn
-                    hat1Entity.setAttribute('position', '0 0 -1');
-                }
-                spawnButton.textContent = isSpawned ? 'Despawn Hat' : 'Spawn Hat';
-            });
-
-            // Add camera switch button functionality
-            const switchCameraButton = document.createElement('button');
-            switchCameraButton.id = 'switchCameraButton';
-            switchCameraButton.className = 'spawn-button';
-            switchCameraButton.style.bottom = '60px'; // Adjust position above the spawn button
-            switchCameraButton.textContent = 'Switch Camera';
-            document.body.appendChild(switchCameraButton);
-
-            // Initialize MindARThree
-            const mindarThree = new window.MINDAR.FACE.MindARThree({
-                container: document.body,
-            });
-            const { renderer, scene: mindarScene, camera } = mindarThree;
-
-            // Start MindARThree
-            const startMindAR = async () => {
-                await mindarThree.start();
-                renderer.setAnimationLoop(() => {
-                    renderer.render(mindarScene, camera);
-                });
-            };
-
-            startMindAR();
-
-            // Add event listener for camera switch
-            switchCameraButton.addEventListener('click', () => {
-                mindarThree.switchCamera();
-            });
-        })
-    </script>
-    <style>
-        body {
-            margin: 0;
-        }
-
-        .example-container {
-            overflow: hidden;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        .options-panel {
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 2;
-        }
-
-            .options-panel img {
-                border: solid 2px;
-                width: 50px;
-                height: 50px;
-                object-fit: cover;
-                cursor: pointer;
-            }
-
-                .options-panel img.selected {
-                    border-color: green;
-                }
-
-        .spawn-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 2;
-        }
-
-        .spawn-button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <script src="./mindar-face-three.prod.js"></script>
+    <script src="./switchcam.js" type="module"></script>
 </head>
+<style>
+    html, body {
+        position: relative;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden
+    }
+
+    #switch {
+        position: fixed;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+</style>
 <body>
-    <div class="example-container">
-        <div class="options-panel">
-            <img id="hat1" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat/thumbnail.png" />
-            <img id="hat2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat2/thumbnail.png" />
-            <img id="glasses1" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses/thumbnail.png" />
-            <img id="glasses2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses2/thumbnail.png" />
-            <img id="earring" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/earring/thumbnail.png" />
-        </div>
-        <button id="spawnButton" class="spawn-button">Spawn Hat</button>
-        <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-            <a-assets>
-                <a-asset-item id="headModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
-                <a-asset-item id="glassesModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses/scene.gltf"></a-asset-item>
-                <a-asset-item id="glassesModel2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses2/scene.gltf"></a-asset-item>
-                <a-asset-item id="hatModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat/scene.gltf"></a-asset-item>
-                <a-asset-item id="hatModel2" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/hat2/scene.gltf"></a-asset-item>
-                <a-asset-item id="earringModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/earring/scene.gltf"></a-asset-item>
-            </a-assets>
-            <a-camera active="false" position="0 0 0"></a-camera>
-            <!-- head occluder -->
-            <a-entity mindar-face-target="anchorIndex: 168">
-                <a-gltf-model mindar-face-occluder position="0 -0.3 0.15" rotation="0 0 0" scale="0.065 0.065 0.065" src="#headModel"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 10">
-                <a-gltf-model rotation="0 -0 0" position="0 1.0 -0.5" scale="0.35 0.35 0.35" src="#hatModel" class="hat1-entity" visible="false"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 10">
-                <a-gltf-model rotation="0 -0 0" position="0 -0.2 -0.5" scale="0.008 0.008 0.008" src="#hatModel2" class="hat2-entity" visible="false"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 168">
-                <a-gltf-model rotation="0 -0 0" position="0 0 0" scale="0.01 0.01 0.01" src="#glassesModel" class="glasses1-entity" visible="false"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 168">
-                <a-gltf-model rotation="0 -90 0" position="0 -0.3 0" scale="0.6 0.6 0.6" src="#glassesModel2" class="glasses2-entity" visible="false"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 127">
-                <a-gltf-model rotation="-0.1 -0 0" position="0 -0.3 -0.3" scale="0.05 0.05 0.05" src="#earringModel" class="earring-entity" visible="false"></a-gltf-model>
-            </a-entity>
-            <a-entity mindar-face-target="anchorIndex: 356">
-                <a-gltf-model rotation="0.1 -0 0" position="0 -0.3 -0.3" scale="0.05 0.05 0.05" src="#earringModel" class="earring-entity" visible="false"></a-gltf-model>
-            </a-entity>
-        </a-scene>
-    </div>
+    <a-scene mindar-face embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-camera active="false" position="0 0 0"></a-camera>
+        <a-entity mindar-face-target="anchorIndex: 1">
+            <a-sphere color="red" radius="0.1"></a-sphere>
+        </a-entity>
+    </a-scene>
+</body>
+<body>
+    <button id="switch">Switch</button>
 </body>
 </html>
