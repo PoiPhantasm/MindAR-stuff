@@ -2,76 +2,118 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/shaders/LuminosityShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        #header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border-radius: 5px;
+            z-index: 9999;
+        }
+
+        /* Overlay Styling */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Makes it non-interactive */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 99; /* Below header but above the scene */
+        }
+    </style>
 </head>
 <body>
-    <a-scene mindar-face embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <!-- Header for displaying the file name -->
+    <div id="header"></div>
+
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
+    <a-scene mindar-image="imageTargetSrc:./assets/targets.mind; filterMinCF:0.1; filterBeta:10;"
+             color-space="sRGB"
+             renderer="colorManagement: true, physicallyCorrectLights"
+             vr-mode-ui="enabled: false"
+             device-orientation-permission-ui="enabled: false">
+
         <a-assets>
-            <a-asset-item id="glassesModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/glasses/scene.gltf"></a-asset-item>
-            <a-asset-item id="headModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
+            <a-asset-item id="bearModel" src="./assets/bear/scene.gltf"></a-asset-item>
+            <a-asset-item id="raccoonModel" src="./assets/raccoon/scene.gltf"></a-asset-item>
+            <a-asset-item id="myModel" src="./assets/test/scene.glb"></a-asset-item>
         </a-assets>
 
-        <a-camera active="false" position="0 0 0"></a-camera>
-        <a-entity mindar-face-target="anchorIndex: 168">
-            <a-gltf-model mindar-face-occluder position="0 -0.3 0.15" rotation="0 0 0" scale="0.065 0.065 0.065" src="#headModel"></a-gltf-model>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Targets -->
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#raccoonModel" animation-mixer></a-gltf-model>
         </a-entity>
-        <a-entity mindar-face-target="anchorIndex: 168">
-            <a-gltf-model rotation="0 0 0" position="0 0 0" scale="0.01 0.01 0.01" src="#glassesModel"></a-gltf-model>
+        <a-entity mindar-image-target="targetIndex: 1">
+            <a-gltf-model rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#bearModel" animation-mixer></a-gltf-model>
+        </a-entity>
+        <a-entity mindar-image-target="targetIndex: 2">
+            <a-gltf-model rotation="0 0 0" position="0 -0.25 0" scale="0.5 0.5 0.5" src="#myModel" animation-mixer></a-gltf-model>
+        </a-entity>
+        <a-entity mindar-image-target="targetIndex: 3">
+            <a-gltf-model rotation="0 0 0" position="0 -0.25 0" scale="0.2 0.2 0.2" src="#myModel" animation-mixer></a-gltf-model>
         </a-entity>
     </a-scene>
 
     <script>
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-            const sceneEl = document.querySelector('a-scene');
-            const renderer = sceneEl.renderer;
-            const scene = sceneEl.object3D;
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.getElementById('header');
+            const overlay = document.getElementById('overlay');
 
-            sceneEl.renderer.autoClear = false;
-            let activeCamera = sceneEl.querySelector('a-camera');
-            if (!activeCamera) {
-                console.error('No active camera found!');
-                return;
-            }
+            // Display the file name in the header
+            const fileName = location.pathname.split('/').pop();
+            header.textContent = `File Name: ${fileName}`;
 
-            // Create post-processing composer
-            const composer = new THREE.EffectComposer(renderer);
-            const renderPass = new THREE.RenderPass(scene, activeCamera);
+            // Define different overlay images for each target index
+            const overlayImages = {
+                0: './assets/overlay.png',
+                1: './assets/overlay2.png',
+                2: './assets/overlay.png',
+                3: './assets/overlay2.png'
+            };
 
-            // Create LuminosityShader pass
-            const bwPass = new THREE.ShaderPass(THREE.LuminosityShader);
+            // Listen for target found and lost events
+            const targets = document.querySelectorAll('[mindar-image-target]');
 
-            // Manually set the uniforms for LuminosityShader (in case they are undefined)
-            if (!bwPass.uniforms) {
-                bwPass.uniforms = {};
-            }
+            targets.forEach((target) => {
+                target.addEventListener('targetFound', (event) => {
+                    const targetIndex = target.getAttribute('mindar-image-target').targetIndex;
+                    console.log(`Marker found: Target Index ${targetIndex}`);
 
-            if (!bwPass.uniforms['luminosityThreshold']) {
-                bwPass.uniforms['luminosityThreshold'] = { value: 0.5 };  // Default value for luminosity threshold
-            }
+                    // Update the overlay background
+                    if (overlayImages[targetIndex]) {
+                        overlay.style.backgroundImage = `url(${overlayImages[targetIndex]})`;
+                        overlay.style.opacity = '1'; // Show overlay
 
-            if (!bwPass.uniforms['luminositySmoothing']) {
-                bwPass.uniforms['luminositySmoothing'] = { value: 0.5 };  // Default value for smoothing
-            }
+                        // Send a message to eventstest.html
+                        if (window.opener) {
+                            const message = `Overlay for target index ${targetIndex} is displayed.`;
+                            window.opener.postMessage(message, '*');
+                        } else {
+                            console.error("No opener window found.");
+                        }
+                    }
+                });
 
-            // Optionally, adjust other parameters as needed
-            bwPass.uniforms['luminosityThreshold'].value = 0.5;  // Adjust luminosity threshold
-            bwPass.uniforms['luminositySmoothing'].value = 0.5;  // Adjust smoothing effect
-
-            const copyPass = new THREE.ShaderPass(THREE.CopyShader);
-
-            // Add passes to composer
-            composer.addPass(renderPass);
-            composer.addPass(bwPass);
-            composer.addPass(copyPass);
-
-            renderer.setAnimationLoop(() => {
-                composer.render();
+                target.addEventListener('targetLost', () => {
+                    console.log('Marker lost');
+                    overlay.style.opacity = '0'; // Hide overlay
+                });
             });
         });
     </script>

@@ -84,6 +84,25 @@
             examplePlane.addEventListener("click", event => {
                 console.log("plane click");
             });
+
+            // Open test.html when the button is clicked
+            const openTestPageButton = document.getElementById('openTestPage');
+            openTestPageButton.addEventListener('click', () => {
+                const testWindow = window.open('test.html', 'testWindow');
+                if (!testWindow) {
+                    console.error("Failed to open test.html. Please check your browser's popup blocker settings.");
+                }
+            });
+
+            // Listen for messages from other windows
+            window.addEventListener('message', (event) => {
+                // For security, you might want to check event.origin
+                console.log('Message received:', event.data);
+
+                // Display the message on the screen
+                const header = document.getElementById('header');
+                header.textContent = event.data;
+            });
         });
     </script>
 </head>
@@ -103,7 +122,7 @@
         <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="near: 10; far: 10000; objects: .clickable"></a-camera>
 
         <a-entity id="example-target" mindar-image-target="targetIndex: 0">
-            <a-plane id="example-plane" class="clickable" color="blue" opaciy="0.5" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
+            <a-plane id="example-plane" class="clickable" color="blue" opacity="0.5" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
         </a-entity>
     </a-scene>
     <script>
@@ -114,6 +133,8 @@
             header.textContent = `${fileName}`;
         });
     </script>
+    <!-- Add a button to open test.html -->
+    <button id="openTestPage" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">Open Test Page</button>
 </body>
 
 </html>
