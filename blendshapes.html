@@ -89,6 +89,16 @@
                 }
                 renderer.render(scene, camera);
             });
+
+            // Add event listener for the toggle button
+            const toggleButton = document.getElementById('toggle-video-feed');
+            toggleButton.addEventListener('click', () => {
+                if (feedVideo.style.display === 'none') {
+                    feedVideo.style.display = 'block';
+                } else {
+                    feedVideo.style.display = 'none';
+                }
+            });
         }
         start();
     </script>
@@ -112,6 +122,19 @@
             z-index: 9999999;
             transform: scaleX(-1);
         }
+
+        #toggle-video-feed {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10000000;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -119,5 +142,6 @@
     </div>
     <video id="video-feed">
     </video>
+    <button id="toggle-video-feed">Toggle Video Feed</button>
 </body>
 </html>
