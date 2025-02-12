@@ -19,26 +19,7 @@
         border-radius: 5px;
         cursor: pointer;
       }
-      #rotate-left {
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      #rotate-right {
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      #rotate-up {
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      #rotate-down {
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
+
     </style>
   </head>
   <body>
@@ -57,12 +38,6 @@
         <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#bearModel" animation-mixer></a-gltf-model>
       </a-entity>
     </a-scene>
-
-    <button id="rotate-left">Rotate Left</button>
-    <button id="rotate-right">Rotate Right</button>
-    <button id="rotate-up">Rotate Up</button>
-    <button id="rotate-down">Rotate Down</button>
-
     <script>
       AFRAME.registerComponent('keep-visible', {
         init: function () {
@@ -104,32 +79,59 @@
         });
       };
 
-      let startX, startY, isDragging = false;
+      const zoomModel = (modelId, scaleFactor) => {
+        const model = document.getElementById(modelId);
+        const currentScale = model.getAttribute('scale');
+        model.setAttribute('scale', {
+          x: currentScale.x * scaleFactor,
+          y: currentScale.y * scaleFactor,
+          z: currentScale.z * scaleFactor
+        });
+      };
+
+      let startX, startY, isDragging = false, initialDistance = null;
 
       // Touch controls
       document.addEventListener('touchstart', (event) => {
-        const touch = event.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
+        if (event.touches.length === 1) {
+          const touch = event.touches[0];
+          startX = touch.clientX;
+          startY = touch.clientY;
+        } else if (event.touches.length === 2) {
+          initialDistance = Math.hypot(
+            event.touches[0].clientX - event.touches[1].clientX,
+            event.touches[0].clientY - event.touches[1].clientY
+          );
+        }
       });
 
       document.addEventListener('touchmove', (event) => {
-        if (!startX || !startY) return;
+        if (event.touches.length === 1 && startX !== null && startY !== null) {
+          const touch = event.touches[0];
+          const deltaX = touch.clientX - startX;
+          const deltaY = touch.clientY - startY;
 
-        const touch = event.touches[0];
-        const deltaX = touch.clientX - startX;
-        const deltaY = touch.clientY - startY;
+          rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
+          rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
 
-        rotateModel('raccoonModelEntity', -deltaY * 0.1, deltaX * 0.1);
-        rotateModel('bearModelEntity', -deltaY * 0.1, deltaX * 0.1);
-
-        startX = touch.clientX;
-        startY = touch.clientY;
+          startX = touch.clientX;
+          startY = touch.clientY;
+        } else if (event.touches.length === 2 && initialDistance !== null) {
+          const currentDistance = Math.hypot(
+            event.touches[0].clientX - event.touches[1].clientX,
+            event.touches[0].clientY - event.touches[1].clientY
+          );
+          const scaleFactor = currentDistance / initialDistance;
+          zoomModel('raccoonModelEntity', scaleFactor);
+          zoomModel('bearModelEntity', scaleFactor);
+          initialDistance = currentDistance;
+        }
       });
 
       document.addEventListener('touchend', () => {
         startX = null;
         startY = null;
+        initialDistance = null;
       });
 
       // Mouse controls
@@ -145,8 +147,8 @@
         const deltaX = event.clientX - startX;
         const deltaY = event.clientY - startY;
 
-        rotateModel('raccoonModelEntity', -deltaY * 0.1, deltaX * 0.1);
-        rotateModel('bearModelEntity', -deltaY * 0.1, deltaX * 0.1);
+        rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
+        rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
 
         startX = event.clientX;
         startY = event.clientY;
@@ -154,6 +156,12 @@
 
       document.addEventListener('mouseup', () => {
         isDragging = false;
+      });
+
+      document.addEventListener('wheel', (event) => {
+        const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
+        zoomModel('raccoonModelEntity', scaleFactor);
+        zoomModel('bearModelEntity', scaleFactor);
       });
     </script>
   </body>
