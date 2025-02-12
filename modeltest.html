@@ -79,35 +79,87 @@
             const fileName = location.pathname.split('/').pop();
             header.textContent = `File Name: ${fileName}`;
 
-            // Define different overlay images for each target index
-            const overlayImages = {
-                0: './assets/overlay.png',
-                1: './assets/overlay2.png',
-                2: './assets/overlay.png',
-                3: './assets/overlay2.png'
-            };
+            document.addEventListener("DOMContentLoaded", () => {
+                // ... (keep existing header and overlay code) ... 
 
-            // Listen for target found and lost events
-            const targets = document.querySelectorAll('[mindar-image-target]');
-
-            targets.forEach((target) => {
-                target.addEventListener('targetFound', (event) => {
-                    const targetIndex = target.getAttribute('mindar-image-target').targetIndex;
-                    console.log(`Marker found: Target Index ${targetIndex}`);
-
-                    // Update the overlay background
-                    if (overlayImages[targetIndex]) {
-                        overlay.style.backgroundImage = `url(${overlayImages[targetIndex]})`;
-                        overlay.style.opacity = '1'; // Show overlay
-                    }
+                // Add rotation control to models
+                const scene = document.querySelector('a-scene');
+                scene.addEventListener('loaded', () => {
+                    const models = document.querySelectorAll('a-gltf-model');
+                    models.forEach((model) => {
+                        setupRotation(model);
+                    });
                 });
 
-                target.addEventListener('targetLost', () => {
-                    console.log('Marker lost');
-                    overlay.style.opacity = '0'; // Hide overlay
-                });
+                function setupRotation(model) {
+                    let isDragging = false;
+                    let previousX = 0;
+                    let previousY = 0;
+
+                    const startDrag = (x, y) => {
+                        if (model.getAttribute('visible') !== true) return;
+                        isDragging = true;
+                        previousX = x;
+                        previousY = y;
+                    };
+
+                    const endDrag = () => {
+                        isDragging = false;
+                    };
+
+                    const moveDrag = (x, y) => {
+                        if (!isDragging) return;
+
+                        const deltaX = x - previousX;
+                        const deltaY = y - previousY;
+                        const rotation = model.getAttribute('rotation');
+
+                        model.setAttribute('rotation', {
+                            x: rotation.x - deltaY * 0.5,
+                            y: rotation.y + deltaX * 0.5,
+                            z: rotation.z
+                        });
+
+                        previousX = x;
+                        previousY = y;
+                    };
+
+                    // Mouse events
+                    model.addEventListener('mousedown', (e) => {
+                        startDrag(e.clientX, e.clientY);
+                        e.stopPropagation();
+                    });
+
+                    window.addEventListener('mousemove', (e) => {
+                        moveDrag(e.clientX, e.clientY);
+                    });
+
+                    window.addEventListener('mouseup', endDrag);
+
+                    // Touch events
+                    model.addEventListener('touchstart', (e) => {
+                        if (e.touches.length === 1) {
+                            startDrag(e.touches[0].clientX, e.touches[0].clientY);
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    });
+
+                    window.addEventListener('touchmove', (e) => {
+                        if (e.touches.length === 1) {
+                            moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+                            e.preventDefault();
+                        }
+                    });
+
+                    window.addEventListener('touchend', endDrag);
+                }
+
+           
             });
-        });
+
+            });
+
     </script>
 </body>
 </html>
