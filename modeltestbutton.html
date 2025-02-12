@@ -5,10 +5,6 @@
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
       #rotate-left, #rotate-right, #rotate-up, #rotate-down {
         position: fixed;
         z-index: 1000;
@@ -104,57 +100,30 @@
         });
       };
 
-      let startX, startY, isDragging = false;
+      const setupRotationButton = (buttonId, angleX, angleY) => {
+        let interval;
+        const button = document.getElementById(buttonId);
 
-      // Touch controls
-      document.addEventListener('touchstart', (event) => {
-        const touch = event.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-      });
+        button.addEventListener('mousedown', () => {
+          interval = setInterval(() => {
+            rotateModel('raccoonModelEntity', angleX, angleY);
+            rotateModel('bearModelEntity', angleX, angleY);
+          }, 100);
+        });
 
-      document.addEventListener('touchmove', (event) => {
-        if (!startX || !startY) return;
+        button.addEventListener('mouseup', () => {
+          clearInterval(interval);
+        });
 
-        const touch = event.touches[0];
-        const deltaX = touch.clientX - startX;
-        const deltaY = touch.clientY - startY;
+        button.addEventListener('mouseleave', () => {
+          clearInterval(interval);
+        });
+      };
 
-        rotateModel('raccoonModelEntity', -deltaY * 0.1, deltaX * 0.1);
-        rotateModel('bearModelEntity', -deltaY * 0.1, deltaX * 0.1);
-
-        startX = touch.clientX;
-        startY = touch.clientY;
-      });
-
-      document.addEventListener('touchend', () => {
-        startX = null;
-        startY = null;
-      });
-
-      // Mouse controls
-      document.addEventListener('mousedown', (event) => {
-        isDragging = true;
-        startX = event.clientX;
-        startY = event.clientY;
-      });
-
-      document.addEventListener('mousemove', (event) => {
-        if (!isDragging) return;
-
-        const deltaX = event.clientX - startX;
-        const deltaY = event.clientY - startY;
-
-        rotateModel('raccoonModelEntity', -deltaY * 0.1, deltaX * 0.1);
-        rotateModel('bearModelEntity', -deltaY * 0.1, deltaX * 0.1);
-
-        startX = event.clientX;
-        startY = event.clientY;
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-      });
+      setupRotationButton('rotate-left', 0, -10);
+      setupRotationButton('rotate-right', 0, 10);
+      setupRotationButton('rotate-up', -10, 0);
+      setupRotationButton('rotate-down', 10, 0);
     </script>
   </body>
 </html>
