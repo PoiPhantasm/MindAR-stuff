@@ -32,10 +32,10 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" id="raccoonTarget" keep-visible>
-        <a-gltf-model id="raccoonModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#raccoonModel" animation-mixer></a-gltf-model>
+        <a-gltf-model id="raccoonModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.1 0.1 0.1" src="#raccoonModel" animation-mixer></a-gltf-model>
       </a-entity>
       <a-entity mindar-image-target="targetIndex: 1" id="bearTarget" keep-visible>
-        <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#bearModel" animation-mixer></a-gltf-model>
+        <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.2 0.2 0.2" src="#bearModel" animation-mixer></a-gltf-model>
       </a-entity>
     </a-scene>
     <script>
@@ -52,22 +52,27 @@
           el.addEventListener('targetLost', () => {
             if (isVisible) {
               el.setAttribute('visible', true); // Keep it visible
-              resetModelRotation(el); // Reset rotation
+              resetModelProperties(el); // Reset rotation and scale
             }
           });
         }
       });
 
-      const resetModelRotation = (entity) => {
+      const resetModelProperties = (entity) => {
         const model = entity.querySelector('a-gltf-model');
         if (model) {
           model.setAttribute('rotation', { x: 0, y: 0, z: 0 });
+          model.setAttribute('scale', { x: ORIGINAL_SCALE, y: ORIGINAL_SCALE, z: ORIGINAL_SCALE });
         }
       };
 
       document.querySelectorAll('[mindar-image-target]').forEach(target => {
         target.setAttribute('keep-visible', '');
       });
+
+      const ORIGINAL_SCALE = 0.05;
+      const MIN_SCALE = ORIGINAL_SCALE * 0.5;
+      const MAX_SCALE = ORIGINAL_SCALE * 3;
 
       const rotateModel = (modelId, angleX, angleY) => {
         const model = document.getElementById(modelId);
@@ -82,11 +87,12 @@
       const zoomModel = (modelId, scaleFactor) => {
         const model = document.getElementById(modelId);
         const currentScale = model.getAttribute('scale');
-        model.setAttribute('scale', {
-          x: currentScale.x * scaleFactor,
-          y: currentScale.y * scaleFactor,
-          z: currentScale.z * scaleFactor
-        });
+        const newScale = {
+          x: Math.min(Math.max(currentScale.x * scaleFactor, MIN_SCALE), MAX_SCALE),
+          y: Math.min(Math.max(currentScale.y * scaleFactor, MIN_SCALE), MAX_SCALE),
+          z: Math.min(Math.max(currentScale.z * scaleFactor, MIN_SCALE), MAX_SCALE)
+        };
+        model.setAttribute('scale', newScale);
       };
 
       let startX, startY, isDragging = false, initialDistance = null;
