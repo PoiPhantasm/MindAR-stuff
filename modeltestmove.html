@@ -1,4 +1,4 @@
-<html>
+<html></html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -9,7 +9,7 @@
         margin: 0;
         overflow: hidden;
       }
-      #rotate-left, #rotate-right, #rotate-up, #rotate-down {
+      #rotate-left, #rotate-right, #rotate-up, #rotate-down, #reset-button {
         position: fixed;
         z-index: 1000;
         padding: 10px 20px;
@@ -19,26 +19,31 @@
         border-radius: 5px;
         cursor: pointer;
       }
-
+      #reset-button {
+        bottom: 20px;
+        left: 20px; /* Positioned at bottom left */
+      }
     </style>
   </head>
   <body>
-    <a-scene mindar-image="imageTargetSrc:./assets/coffee.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/band.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       <a-assets>
-        <a-asset-item id="bearModel" src="./assets/bear/scene.gltf"></a-asset-item>
-        <a-asset-item id="raccoonModel" src="./assets/raccoon/scene.gltf"></a-asset-item>
-        <a-asset-item id="myModel" src="./assets/test/scene.glb"></a-asset-item>
+        <a-asset-item id="bearModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/bear/scene.gltf"></a-asset-item>
+        <a-asset-item id="raccoonModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/raccoon/scene.gltf"></a-asset-item>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" id="raccoonTarget" keep-visible>
-        <a-gltf-model id="raccoonModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.1 0.1 0.1" src="#raccoonModel" animation-mixer></a-gltf-model>
+        <a-gltf-model id="raccoonModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#raccoonModel" animation-mixer></a-gltf-model>
       </a-entity>
       <a-entity mindar-image-target="targetIndex: 1" id="bearTarget" keep-visible>
-        <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.2 0.2 0.2" src="#bearModel" animation-mixer></a-gltf-model>
+        <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.05 0.05 0.05" src="#bearModel" animation-mixer></a-gltf-model>
       </a-entity>
     </a-scene>
+
+    <button id="reset-button">Reset</button>
+
     <script>
       AFRAME.registerComponent('keep-visible', {
         init: function () {
@@ -59,21 +64,22 @@
         }
       });
 
+      const ORIGINAL_SCALE = 0.05;
+      const MIN_SCALE = ORIGINAL_SCALE * 0.5;
+      const MAX_SCALE = ORIGINAL_SCALE * 3;
+
       const resetModelProperties = (entity) => {
         const model = entity.querySelector('a-gltf-model');
         if (model) {
           model.setAttribute('rotation', { x: 0, y: 0, z: 0 });
           model.setAttribute('scale', { x: ORIGINAL_SCALE, y: ORIGINAL_SCALE, z: ORIGINAL_SCALE });
+          model.setAttribute('position', { x: 0, y: -0.25, z: 0 });
         }
       };
 
       document.querySelectorAll('[mindar-image-target]').forEach(target => {
         target.setAttribute('keep-visible', '');
       });
-
-      const ORIGINAL_SCALE = 0.05;
-      const MIN_SCALE = ORIGINAL_SCALE * 0.5;
-      const MAX_SCALE = ORIGINAL_SCALE * 3;
 
       const rotateModel = (modelId, angleX, angleY) => {
         const model = document.getElementById(modelId);
@@ -96,6 +102,16 @@
         model.setAttribute('scale', newScale);
       };
 
+      const moveModel = (modelId, deltaX, deltaY) => {
+        const model = document.getElementById(modelId);
+        const currentPosition = model.getAttribute('position');
+        model.setAttribute('position', {
+          x: currentPosition.x + deltaX,
+          y: currentPosition.y + deltaY,
+          z: currentPosition.z
+        });
+      };
+
       let startX, startY, isDragging = false, initialDistance = null;
 
       // Touch controls
@@ -115,11 +131,11 @@
       document.addEventListener('touchmove', (event) => {
         if (event.touches.length === 1 && startX !== null && startY !== null) {
           const touch = event.touches[0];
-          const deltaX = touch.clientX - startX;
-          const deltaY = touch.clientY - startY;
+          const deltaX = (touch.clientX - startX) * 0.01;
+          const deltaY = (touch.clientY - startY) * 0.01;
 
-          rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
-          rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
+          moveModel('raccoonModelEntity', deltaX, -deltaY);
+          moveModel('bearModelEntity', deltaX, -deltaY);
 
           startX = touch.clientX;
           startY = touch.clientY;
@@ -143,19 +159,26 @@
 
       // Mouse controls
       document.addEventListener('mousedown', (event) => {
-        isDragging = true;
-        startX = event.clientX;
-        startY = event.clientY;
+        if (event.button === 0 || event.button === 2) { // Left or right click
+          isDragging = true;
+          startX = event.clientX;
+          startY = event.clientY;
+        }
       });
 
       document.addEventListener('mousemove', (event) => {
         if (!isDragging) return;
 
-        const deltaX = event.clientX - startX;
-        const deltaY = event.clientY - startY;
+        const deltaX = (event.clientX - startX) * 0.01;
+        const deltaY = (event.clientY - startY) * 0.01;
 
-        rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
-        rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
+        if (event.buttons === 2) { // Right-click for rotation
+          rotateModel('raccoonModelEntity', -deltaY * 20, deltaX * 20);
+          rotateModel('bearModelEntity', -deltaY * 20, deltaX * 20);
+        } else if (event.buttons === 1) { // Left-click for moving
+          moveModel('raccoonModelEntity', deltaX, -deltaY);
+          moveModel('bearModelEntity', deltaX, -deltaY);
+        }
 
         startX = event.clientX;
         startY = event.clientY;
@@ -165,10 +188,20 @@
         isDragging = false;
       });
 
+      document.addEventListener('contextmenu', (event) => {
+        event.preventDefault(); // Prevent context menu on right-click
+      });
+
       document.addEventListener('wheel', (event) => {
         const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
         zoomModel('raccoonModelEntity', scaleFactor);
         zoomModel('bearModelEntity', scaleFactor);
+      });
+
+      // Reset button functionality
+      document.getElementById('reset-button').addEventListener('click', () => {
+        resetModelProperties(document.getElementById('raccoonTarget'));
+        resetModelProperties(document.getElementById('bearTarget'));
       });
     </script>
   </body>
