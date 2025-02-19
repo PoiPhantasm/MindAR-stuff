@@ -3,7 +3,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
 	const list = ["glasses1", "glasses2", "hat1", "hat2", "earring"];
@@ -26,24 +25,50 @@
 	    visibles[index] = !visibles[index];
 	    setVisible(button, entities, visibles[index]);
 	  });
-	});
+	})
 
-	// Add screenshot functionality
-	const captureButton = document.createElement('button');
-	captureButton.innerText = 'Capture Screenshot';
-	captureButton.style.position = 'fixed';
-	captureButton.style.top = '10px';
-	captureButton.style.right = '10px';
-	captureButton.style.zIndex = 3; // Ensure it's above other elements
-	document.body.appendChild(captureButton);
+	// Add capture function
+	const capture = (scene) => {
+	  const video = document.querySelector("video");
+	  const canvas = document.createElement('canvas');
+	  const context = canvas.getContext('2d');
+	  const renderer = document.querySelector("a-scene").renderer;
 
+	  canvas.width = video.videoWidth;
+	  canvas.height = video.videoHeight;
+
+	  // Save the current transform
+	  context.save();
+	  
+	  // Flip the context horizontally for video only
+	  context.scale(-1, 1);
+	  context.translate(-canvas.width, 0);
+	  
+	  // Draw video frame (flipped)
+	  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+	  
+	  // Restore the transform before drawing AR scene
+	  context.restore();
+
+	  // Draw AR scene (not flipped)
+	  renderer.preserveDrawingBuffer = true;
+	  renderer.render(scene.object3D, scene.camera);
+	  context.drawImage(renderer.domElement, 0, 0, canvas.width, canvas.height);
+	  renderer.preserveDrawingBuffer = false;
+
+	  // Create download link
+	  const data = canvas.toDataURL('image/png');
+	  const link = document.createElement('a');
+	  link.download = 'photo.png';
+	  link.href = data;
+	  link.click();
+	}
+
+	// Add capture button event listener
+	const captureButton = document.getElementById('capture');
+	const scene = document.querySelector('a-scene');
 	captureButton.addEventListener('click', () => {
-	  html2canvas(document.querySelector('.example-container')).then(canvas => {
-	    const link = document.createElement('a');
-	    link.href = canvas.toDataURL();
-	    link.download = 'screenshot.png';
-	    link.click();
-	  });
+	  capture(scene);
 	});
       })
     </script>
@@ -72,6 +97,33 @@
       }
       .options-panel img.selected {
 	border-color: green;
+      }
+      /* Add new capture button styles */
+      #capture {
+	position: fixed;
+	bottom: 2vh; 
+	left: 50%;
+	height: 60px; 
+	width: 60px; 
+	background-color: white; 
+	border: solid 2px white;
+	border-radius: 50%;
+	transform: translateX(-50%);
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+      }
+      #capture::before {
+	content: '';
+	display: block;
+	height: 50px; 
+	width: 50px; 
+	background-image: url('./assets/photocap.jpg');
+	background-size: cover;
+	background-position: center;
+	border-radius: 50%;
       }
     </style>
   </head>
@@ -118,5 +170,6 @@
         </a-entity>
       </a-scene>
     </div>
+    <button id="capture"></button>
   </body>
 </html>
