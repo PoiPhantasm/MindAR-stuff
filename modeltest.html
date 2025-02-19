@@ -19,7 +19,31 @@
         border-radius: 5px;
         cursor: pointer;
       }
-
+      #capture {
+        position: fixed;
+        bottom: 2vh;
+        left: 50%;
+        height: 60px; 
+        width: 60px; 
+        background-color: white; 
+        border: solid 2px white;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #capture::before {
+        content: '';
+        display: block;
+        height: 50px; 
+        width: 50px; 
+        background-image: url('./assets/photocap.jpg'); /* Replace with your image path */
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -39,7 +63,35 @@
         <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.2 0.2 0.2" src="#bearModel" animation-mixer></a-gltf-model>
       </a-entity>
     </a-scene>
+
+    <button id="capture"></button>
+
     <script>
+      // Photo capture functionality
+      const captureButton = document.getElementById('capture');
+      captureButton.addEventListener('click', () => {
+        const scene = document.querySelector('a-scene');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const video = document.querySelector('video');
+
+        // Set canvas dimensions to match the video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw the video frame to the canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to image data URL
+        const imageDataUrl = canvas.toDataURL('image/png');
+
+        // Create a link to download the image
+        const link = document.createElement('a');
+        link.href = imageDataUrl;
+        link.download = 'captured-image.png';
+        link.click();
+      });
+
       AFRAME.registerComponent('keep-visible', {
         init: function () {
           const el = this.el;
