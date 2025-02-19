@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       container: document.body,
     });
     const {renderer, scene, camera} = mindarThree;
-
+/* 
     const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 1 );
     scene.add(light);
 
@@ -45,17 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
     glasses.scene.scale.set(0.01, 0.01, 0.01);
 
     const anchor = mindarThree.addAnchor(168);
-    anchor.group.add(glasses.scene);
+    anchor.group.add(glasses.scene); */
 
     document.querySelector("#capture").addEventListener("click", () => {
+      console.log("CCap");
       capture(mindarThree);
     });
 
-    await mindarThree.start();
-    renderer.setAnimationLoop(() => {
+     await mindarThree.start(); 
+     renderer.setAnimationLoop(() => {
       renderer.render(scene, camera);
-    });
+    });  
   }
-  start();
+   start();
 });
 

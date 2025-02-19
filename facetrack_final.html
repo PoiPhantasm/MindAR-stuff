@@ -8,6 +8,8 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="./mindar-face-three.prod.js"></script>
+    <script src="./photocapture.js" type="module"></script>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -62,28 +64,10 @@
                     setVisible(button, entities, visibles[index]);
                 });
             });
-
-            // Photo capture functionality
-            const capture = () => {
-                const video = document.querySelector('video');
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // Convert canvas to image
-                const image = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = 'captured-image.png';
-                link.click();
-            };
-
-            // Add event listener for the capture button
-            const captureButton = document.getElementById('capture');
-            captureButton.addEventListener('click', capture);
+       
         });
+
+  
     </script>
     <style>
         body {
