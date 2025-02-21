@@ -165,9 +165,11 @@ const setupResetButton = () => {
 let mindarThree = null;
 
 const setupSwitchCamera = () => {
-  document.querySelector("#switch").addEventListener("click", () => {
-    if (mindarThree) {
-      mindarThree.switchCamera();
+  const switchButton = document.getElementById('switch');
+  switchButton.addEventListener('click', () => {
+    const scene = document.querySelector('a-scene');
+    if (scene.systems['mindar-image-system']) {
+      scene.systems['mindar-image-system'].switchCamera();
     }
   });
 };
