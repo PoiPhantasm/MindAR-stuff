@@ -10,7 +10,7 @@
         margin: 0;
         overflow: hidden;
       }
-      #rotate-left, #rotate-right, #rotate-up, #rotate-down, #reset-button, #switch {
+      #rotate-left, #rotate-right, #rotate-up, #rotate-down, #reset-button {
         position: fixed;
         z-index: 1000;
         padding: 10px 20px;
@@ -23,10 +23,6 @@
       #reset-button {
         bottom: 20px;
         left: 20px; /* Positioned at bottom left */
-      }
-      #switch {
-        top: 10px;
-        right: 10px;
       }
     </style>
   </head>
@@ -49,6 +45,5 @@
     </a-scene>
 
     <button id="reset-button">Reset</button>
-    <button id="switch">Switch Camera</button>
   </body>
 </html>
