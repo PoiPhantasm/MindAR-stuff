@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="./mindar-face-three.prod.js"></script>
-    <script src="./photocapture.js" type="module"></script>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -112,32 +111,6 @@
             font-family: Arial, sans-serif;
             z-index: 2;
         }
-
-        #capture {
-            position: fixed;
-            bottom: 2vh;
-            left: 50%;
-            height: 60px; 
-            width: 60px; 
-            background-color: white; 
-            border: solid 2px white;
-            border-radius: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #capture::before {
-            content: '';
-            display: block;
-            height: 50px; 
-            width: 50px; 
-            background-image: url('./assets/photocap.jpg'); /* Replace with your image path */
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%;
-        }
     </style>
 </head>
 <body>
@@ -197,6 +170,5 @@
     </div>
     <video id="video-feed" style="display: none;"></video>
     <button id="toggle-video-feed">Toggle Video Feed</button>
-    <button id="capture"></button>
 </body>
 </html>

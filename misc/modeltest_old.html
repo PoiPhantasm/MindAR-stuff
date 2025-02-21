@@ -1,0 +1,227 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #rotate-left, #rotate-right, #rotate-up, #rotate-down {
+        position: fixed;
+        z-index: 1000;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #capture {
+        position: fixed;
+        bottom: 2vh;
+        left: 50%;
+        height: 60px; 
+        width: 60px; 
+        background-color: white; 
+        border: solid 2px white;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #capture::before {
+        content: '';
+        display: block;
+        height: 50px; 
+        width: 50px; 
+        background-image: url('./assets/photocap.jpg'); /* Replace with your image path */
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <a-scene mindar-image="imageTargetSrc:./assets/targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-assets>
+        <a-asset-item id="bearModel" src="./assets/bear/scene.gltf"></a-asset-item>
+        <a-asset-item id="raccoonModel" src="./assets/raccoon/scene.gltf"></a-asset-item>
+        <a-asset-item id="myModel" src="./assets/test/scene.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0" id="raccoonTarget" keep-visible>
+        <a-gltf-model id="raccoonModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.1 0.1 0.1" src="#raccoonModel" animation-mixer></a-gltf-model>
+      </a-entity>
+      <a-entity mindar-image-target="targetIndex: 1" id="bearTarget" keep-visible>
+        <a-gltf-model id="bearModelEntity" rotation="0 0 0" position="0 -0.25 0" scale="0.2 0.2 0.2" src="#bearModel" animation-mixer></a-gltf-model>
+      </a-entity>
+    </a-scene>
+
+    <button id="capture"></button>
+
+    <script>
+      // Photo capture functionality
+      const captureButton = document.getElementById('capture');
+      captureButton.addEventListener('click', () => {
+        const scene = document.querySelector('a-scene');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const video = document.querySelector('video');
+
+        // Set canvas dimensions to match the video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw the video frame to the canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to image data URL
+        const imageDataUrl = canvas.toDataURL('image/png');
+
+        // Create a link to download the image
+        const link = document.createElement('a');
+        link.href = imageDataUrl;
+        link.download = 'captured-image.png';
+        link.click();
+      });
+
+      AFRAME.registerComponent('keep-visible', {
+        init: function () {
+          const el = this.el;
+          let isVisible = false;
+
+          el.addEventListener('targetFound', () => {
+            isVisible = true;
+            el.setAttribute('visible', true);
+          });
+
+          el.addEventListener('targetLost', () => {
+            if (isVisible) {
+              el.setAttribute('visible', true); // Keep it visible
+              resetModelProperties(el); // Reset rotation and scale
+            }
+          });
+        }
+      });
+
+      const resetModelProperties = (entity) => {
+        const model = entity.querySelector('a-gltf-model');
+        if (model) {
+          model.setAttribute('rotation', { x: 0, y: 0, z: 0 });
+          model.setAttribute('scale', { x: ORIGINAL_SCALE, y: ORIGINAL_SCALE, z: ORIGINAL_SCALE });
+        }
+      };
+
+      document.querySelectorAll('[mindar-image-target]').forEach(target => {
+        target.setAttribute('keep-visible', '');
+      });
+
+      const ORIGINAL_SCALE = 0.05;
+      const MIN_SCALE = ORIGINAL_SCALE * 0.5;
+      const MAX_SCALE = ORIGINAL_SCALE * 3;
+
+      const rotateModel = (modelId, angleX, angleY) => {
+        const model = document.getElementById(modelId);
+        const currentRotation = model.getAttribute('rotation');
+        model.setAttribute('rotation', {
+          x: currentRotation.x + angleX,
+          y: currentRotation.y + angleY,
+          z: currentRotation.z
+        });
+      };
+
+      const zoomModel = (modelId, scaleFactor) => {
+        const model = document.getElementById(modelId);
+        const currentScale = model.getAttribute('scale');
+        const newScale = {
+          x: Math.min(Math.max(currentScale.x * scaleFactor, MIN_SCALE), MAX_SCALE),
+          y: Math.min(Math.max(currentScale.y * scaleFactor, MIN_SCALE), MAX_SCALE),
+          z: Math.min(Math.max(currentScale.z * scaleFactor, MIN_SCALE), MAX_SCALE)
+        };
+        model.setAttribute('scale', newScale);
+      };
+
+      let startX, startY, isDragging = false, initialDistance = null;
+
+      // Touch controls
+      document.addEventListener('touchstart', (event) => {
+        if (event.touches.length === 1) {
+          const touch = event.touches[0];
+          startX = touch.clientX;
+          startY = touch.clientY;
+        } else if (event.touches.length === 2) {
+          initialDistance = Math.hypot(
+            event.touches[0].clientX - event.touches[1].clientX,
+            event.touches[0].clientY - event.touches[1].clientY
+          );
+        }
+      });
+
+      document.addEventListener('touchmove', (event) => {
+        if (event.touches.length === 1 && startX !== null && startY !== null) {
+          const touch = event.touches[0];
+          const deltaX = touch.clientX - startX;
+          const deltaY = touch.clientY - startY;
+
+          rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
+          rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
+
+          startX = touch.clientX;
+          startY = touch.clientY;
+        } else if (event.touches.length === 2 && initialDistance !== null) {
+          const currentDistance = Math.hypot(
+            event.touches[0].clientX - event.touches[1].clientX,
+            event.touches[0].clientY - event.touches[1].clientY
+          );
+          const scaleFactor = currentDistance / initialDistance;
+          zoomModel('raccoonModelEntity', scaleFactor);
+          zoomModel('bearModelEntity', scaleFactor);
+          initialDistance = currentDistance;
+        }
+      });
+
+      document.addEventListener('touchend', () => {
+        startX = null;
+        startY = null;
+        initialDistance = null;
+      });
+
+      // Mouse controls
+      document.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+      });
+
+      document.addEventListener('mousemove', (event) => {
+        if (!isDragging) return;
+
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+
+        rotateModel('raccoonModelEntity', -deltaY * 0.2, deltaX * 0.2);
+        rotateModel('bearModelEntity', -deltaY * 0.2, deltaX * 0.2);
+
+        startX = event.clientX;
+        startY = event.clientY;
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      document.addEventListener('wheel', (event) => {
+        const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
+        zoomModel('raccoonModelEntity', scaleFactor);
+        zoomModel('bearModelEntity', scaleFactor);
+      });
+    </script>
+  </body>
+</html>
