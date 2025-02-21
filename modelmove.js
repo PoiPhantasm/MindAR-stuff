@@ -164,11 +164,29 @@ const setupResetButton = () => {
 
 const setupSwitchCamera = () => {
   const switchButton = document.getElementById('switch');
-  switchButton.addEventListener('click', () => {
+  switchButton.addEventListener('click', async () => {
     const scene = document.querySelector('a-scene');
-    if (scene.systems['mindar-image-system']) {
-      scene.systems['mindar-image-system'].switchCamera();
-    }
+    const mindARComponent = scene.getAttribute('mindar-image');
+    const currentVideo = document.querySelector('video');
+
+    // Get all video devices
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+    
+    // Find current device index and get next device
+    const currentDeviceId = currentVideo.srcObject.getVideoTracks()[0].getSettings().deviceId;
+    const currentIndex = videoDevices.findIndex(device => device.deviceId === currentDeviceId);
+    const nextIndex = (currentIndex + 1) % videoDevices.length;
+    const nextDeviceId = videoDevices[nextIndex].deviceId;
+
+    // Update constraints with new device
+    mindARComponent.sourceWidth = currentVideo.videoWidth;
+    mindARComponent.sourceHeight = currentVideo.videoHeight;
+    mindARComponent.deviceId = nextDeviceId;
+
+    // Restart the AR system
+    await scene.systems['mindar-image-system'].stop();
+    await scene.systems['mindar-image-system'].start();
   });
 };
 
