@@ -70,6 +70,19 @@
             background-position: center;
             border-radius: 50%;
         }
+
+        #switch {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10000000;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -78,5 +91,6 @@
     <video id="video-feed" style="display: none;"></video>
     <button id="toggle-video-feed">Toggle Video Feed</button>
     <button id="capture"></button>
+    <button id="switch">Switch Camera</button>
 </body>
 </html>

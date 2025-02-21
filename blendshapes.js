@@ -122,6 +122,14 @@ const start = async () => {
     captureButton.addEventListener('click', () => {
         capture(mindarThree);
     });
+
+    // Add switch camera functionality
+    const switchButton = document.getElementById('switch');
+    switchButton.addEventListener('click', () => {
+        if (mindarThree) {
+            mindarThree.switchCamera();
+        }
+    });
 }
 
 start();
