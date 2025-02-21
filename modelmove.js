@@ -162,8 +162,6 @@ const setupResetButton = () => {
   });
 };
 
-let mindarThree = null;
-
 const setupSwitchCamera = () => {
   const switchButton = document.getElementById('switch');
   switchButton.addEventListener('click', () => {
@@ -176,10 +174,6 @@ const setupSwitchCamera = () => {
 
 // Initialize everything when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Get the MindAR instance from the scene
-  const scene = document.querySelector('a-scene');
-  mindarThree = scene.systems['mindar-image-system'].mindarsystem;
-  
   initializeTargets();
   setupTouchControls();
   setupMouseControls();
