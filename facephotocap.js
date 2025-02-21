@@ -50,6 +50,15 @@ document.addEventListener("DOMContentLoaded", function() {
     link.click();
   }
 
+  // Add switch camera functionality
+  const switchButton = document.getElementById('switch');
+  switchButton.addEventListener('click', () => {
+    const scene = document.querySelector('a-scene');
+    if (scene.systems['mindar-face-system']) {
+      scene.systems['mindar-face-system'].switchCamera();
+    }
+  });
+
   const captureButton = document.getElementById('capture');
   const scene = document.querySelector('a-scene');
   captureButton.addEventListener('click', () => {
