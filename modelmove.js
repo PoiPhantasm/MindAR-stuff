@@ -162,17 +162,22 @@ const setupResetButton = () => {
   });
 };
 
+let mindarThree = null;
+
 const setupSwitchCamera = () => {
   document.querySelector("#switch").addEventListener("click", () => {
-    const scene = document.querySelector('a-scene');
-    if (scene.systems['mindar-image-system']) {
-      scene.systems['mindar-image-system'].switchCamera();
+    if (mindarThree) {
+      mindarThree.switchCamera();
     }
   });
 };
 
 // Initialize everything when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  // Get the MindAR instance from the scene
+  const scene = document.querySelector('a-scene');
+  mindarThree = scene.systems['mindar-image-system'].mindarsystem;
+  
   initializeTargets();
   setupTouchControls();
   setupMouseControls();
