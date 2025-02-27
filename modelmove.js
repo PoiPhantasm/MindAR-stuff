@@ -162,6 +162,8 @@ const setupResetButton = () => {
   });
 };
 
+
+
 // Initialize everything when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initializeTargets();
@@ -169,3 +171,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMouseControls();
   setupResetButton();
 });
+
+
